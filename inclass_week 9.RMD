@@ -1,0 +1,82 @@
+---
+title: "LDA ad QDA"
+author: "I. Maslova"
+date: "10/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Use the `Smarket`data like in Lab 6. Split the data into training and testing sets.
+
+```{r}
+library(ISLR2)
+attach(Smarket)
+
+train= Year<2005
+test= !train
+
+training_data=Smarket[train, -8]
+testing_data=Smarket[test, -8]
+
+testing_y=Direction[test]
+```
+
+
+## Linear Discriminant Analysis (LDA)
+
+To run LDA in `R`, we will be using the `lda()` function which is part of a package called `MASS`. This package comes with the core distribution of `R`, so we just need to load it into `R`’s working directory before we use the `lda()` function.
+
+```{r}
+library(MASS)
+lda.model<- lda(Direction~., data= training_data)
+  
+```
+
+Next, we will assess the model, so again we will use `predict()` function on our testing data set.
+
+```{r}
+lda.pred<- predict(lda.model, testing_data)
+
+names(lda.pred)
+head(lda.pred)
+
+lda.pred.Direction<-lda.pred$class
+#don't need to assign true false like logistic regression, just assign class
+```
+
+The good news is that when using an LDA model in the `predict()` function, the output is the categories themselves(classes), unlike what happened when we used logistic regression model (the output was probabilities).
+
+Alright, now it is time to assess the model. We create the confusion matrix and compute the misclassification error.
+
+```{r}
+table(lda.pred.Direction, testing_y)
+
+# misclassification rate for LDA
+mean(lda.pred.Direction!=testing_y)
+```
+
+## Quadratic Discriminant Analysis
+
+Training and assessing a QDA model is very similar in syntax to training and assessing a QDA model. The only difference is in the function name `lda()`.
+
+Let's build the model using the training data, predict the values for the testing set and assess the model performance.
+
+```{r}
+qda.model <- qda(Direction~., data = training_data)
+qda.model
+
+qda.pred = predict(qda.model, testing_data)
+
+qda.pred.Direction=qda.pred$class
+  
+table(qda.pred.Direction, testing_y)
+
+# compute the missclassification rate
+mean(qda.pred.Direction!=testing_y)
+```
+
+
+
